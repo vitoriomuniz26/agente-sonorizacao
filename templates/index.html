@@ -5,23 +5,26 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gerador de Propostas de Sonorização</title>
     <style>
-        body { font-family: sans-serif; max-width: 800px; margin: 40px auto; padding: 20px; border: 1px solid #ccc; border-radius: 10px; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; max-width: 800px; margin: 40px auto; padding: 20px; background-color: #f9f9f9; border: 1px solid #e1e1e1; border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.05); }
         h1 { text-align: center; color: #333; }
-        label { display: block; margin-top: 20px; font-weight: bold; }
-        input, textarea { width: 100%; padding: 10px; margin-top: 5px; border-radius: 5px; border: 1px solid #ddd; box-sizing: border-box;}
-        textarea { height: 150px; }
-        button { display: block; width: 100%; padding: 15px; margin-top: 30px; background-color: #007bff; color: white; border: none; border-radius: 5px; font-size: 16px; cursor: pointer; }
+        label { display: block; margin-top: 20px; font-weight: 600; color: #555; }
+        input, textarea { width: 100%; padding: 12px; margin-top: 5px; border-radius: 5px; border: 1px solid #ccc; box-sizing: border-box; font-size: 16px; }
+        textarea { height: 180px; resize: vertical; }
+        button { display: block; width: 100%; padding: 15px; margin-top: 30px; background-color: #007bff; color: white; border: none; border-radius: 5px; font-size: 18px; font-weight: bold; cursor: pointer; transition: background-color 0.3s; }
         button:hover { background-color: #0056b3; }
     </style>
 </head>
 <body>
     <h1>Gerador de Propostas de Sonorização</h1>
+    
     <form action="/gerar_proposta" method="post">
         <label for="nome_cliente">Nome do Cliente:</label>
         <input type="text" id="nome_cliente" name="nome_cliente" required>
 
         <label for="pedido_tecnico">Descrição do Projeto:</label>
-        <textarea id="pedido_tecnico" name="pedido_tecnico" required></textarea>
+        <textarea id="pedido_tecnico" name="pedido_tecnico" 
+                  placeholder="Ex: Projeto para uma sala de 30m² com pé direito de 2.8m e teto de gesso. Cliente quer um som de alta qualidade para filmes. Incluir também a varanda de 15m² com som ambiente."
+                  required></textarea>
 
         <button type="submit">Gerar Proposta com IA</button>
     </form>
