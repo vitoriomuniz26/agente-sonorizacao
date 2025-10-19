@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Revisar Proposta</title>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; max-width: 900px; margin: 40px auto; padding: 20px; background-color: #f9f9f9; border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.05); }
+        h1, h2 { text-align: center; color: #333; }
+        .form-group { margin-bottom: 20px; }
+        label { display: block; margin-bottom: 5px; font-weight: 600; color: #555; }
+        input, textarea, select { width: 100%; padding: 12px; border-radius: 5px; border: 1px solid #ccc; box-sizing: border-box; font-size: 16px; background-color: #fff; }
+        textarea { height: 150px; resize: vertical; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; vertical-align: middle; }
+        th { background-color: #f2f2f2; }
+        .product-row input, .product-row select { width: 98%; }
+        .actions { text-align: center; margin-top: 30px; }
+        .button { padding: 15px 30px; color: white; border: none; border-radius: 5px; font-size: 18px; font-weight: bold; cursor: pointer; transition: background-color 0.3s; }
+        .button-primary { background-color: #28a745; }
+        .button-primary:hover { background-color: #218838; }
+        .button-secondary { background-color: #007bff; font-size: 16px; padding: 10px 20px; margin-top: 20px; }
+        .button-secondary:hover { background-color: #0056b3; }
+        .button-danger { background-color: #dc3545; font-size: 14px; padding: 8px 12px; }
+        .button-danger:hover { background-color: #c82333; }
+    </style>
+</head>
+<body>
+    <h1>Revisar e Editar Proposta</h1>
+    <h2>Cliente: {{ nome_cliente }}</h2>
+
+    <form action="/criar_pdf" method="post">
+        <input type="hidden" name="nome_cliente" value="{{ nome_cliente }}">
+
+        <div class="form-group">
+            <label for="analise_projeto">Análise do Projeto (Editável):</label>
+            <textarea id="analise_projeto" name="analise_projeto">{{ proposta.analise_projeto }}</textarea>
+        </div>
+
+        <div class="form-group">
+            <label>Itens da Proposta (Editável):</label>
+            <table id="products-table">
+                <thead>
+                    <tr>
+                        <th>Produto</th>
+                        <th>Quantidade</th>
+                        <th>Preço Unit. (R$)</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody id="products-tbody">
+                    {% for item in proposta.itens_proposta %}
+                    <tr class="product-row">
+                        <td>
+                            <!-- Usamos o atributo 'data-selected' para guardar o valor que a IA escolheu -->
+                            <select name="produto" class="product-select" data-selected="{{ item.produto }}" onchange="updatePrice(this)">
+                                {% for produto_catalogo in catalogo_completo %}
+                                    <option value="{{ produto_catalogo.Produto }}" data-price="{{ produto_catalogo.VENDA }}">
+                                        {{ produto_catalogo.Produto }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </td>
+                        <td><input type="number" name="quantidade" value="{{ item.quantidade }}" min="1"></td>
+                        <td><input type="number" step="0.01" name="preco_unitario" value="{{ item.preco_unitario }}" class="price-input"></td>
+                        <td style="text-align: center;"><button type="button" class="button button-danger" onclick="deleteRow(this)">Excluir</button></td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            <button type="button" class="button button-secondary" onclick="addRow()">Adicionar Produto</button>
+        </div>
+
+        <div class="actions">
+            <button type="submit" class="button button-primary">Gerar PDF Final</button>
+        </div>
+    </form>
+
+    <script>
+        // Transforma a lista de produtos do Python numa variável JavaScript
+        const catalogo = {{ catalogo_completo | tojson }};
+
+        function updatePrice(selectElement) {
+            // Atualiza o preço quando um produto é selecionado
+            const selectedOption = selectElement.options[selectElement.selectedIndex];
+            const price = selectedOption.getAttribute('data-price');
+            const priceInput = selectElement.closest('.product-row').querySelector('.price-input');
+            if (price) {
+                priceInput.value = price;
+            }
+        }
+        
+        function addRow() {
+            // Cria uma nova linha na tabela
+            const tableBody = document.getElementById('products-tbody');
+            const newRow = document.createElement('tr');
+            newRow.classList.add('product-row');
+            
+            let innerHTML = `
+                <td>
+                    <select name="produto" class="product-select" onchange="updatePrice(this)">
+                        <option value="">-- Selecione um produto --</option>
+                        ${catalogo.map(p => `<option value="${p.Produto}" data-price="${p.VENDA}">${p.Produto}</option>`).join('')}
+                    </select>
+                </td>
+                <td><input type="number" name="quantidade" value="1" min="1"></td>
+                <td><input type="number" step="0.01" name="preco_unitario" value="0.00" class="price-input"></td>
+                <td style="text-align: center;"><button type="button" class="button button-danger" onclick="deleteRow(this)">Excluir</button></td>
+            `;
+            
+            newRow.innerHTML = innerHTML;
+            tableBody.appendChild(newRow);
+        }
+
+        function deleteRow(button) {
+            // Apaga a linha da tabela
+            const row = button.closest('.product-row');
+            row.remove();
+        }
+
+        // ### CORREÇÃO DEFINITIVA ###: Esta função é executada assim que a página carrega.
+        document.addEventListener('DOMContentLoaded', function() {
+            // Itera sobre cada lista suspensa que foi criada pelo servidor
+            document.querySelectorAll('.product-select').forEach(select => {
+                // Lê o valor que guardámos no atributo 'data-selected'
+                const selectedValue = select.getAttribute('data-selected');
+                // Se esse valor existir, define o valor da lista suspensa para ser esse
+                if (selectedValue) {
+                    select.value = selectedValue;
+                }
+            });
+        });
+    </script>
+</body>
+</html>
+
