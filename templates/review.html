@@ -87,6 +87,8 @@
             const priceInput = selectElement.closest('.product-row').querySelector('.price-input');
             if (price) {
                 priceInput.value = price;
+            } else {
+                priceInput.value = "0.00"; // Define um valor padrão se não houver preço
             }
         }
         
@@ -118,15 +120,32 @@
             row.remove();
         }
 
-        // ### CORREÇÃO DEFINITIVA ###: Esta função é executada assim que a página carrega.
+        // ### CORREÇÃO REFORÇADA ###: Esta função agora tenta encontrar a opção de forma mais flexível.
         document.addEventListener('DOMContentLoaded', function() {
-            // Itera sobre cada lista suspensa que foi criada pelo servidor
             document.querySelectorAll('.product-select').forEach(select => {
-                // Lê o valor que guardámos no atributo 'data-selected'
-                const selectedValue = select.getAttribute('data-selected');
-                // Se esse valor existir, define o valor da lista suspensa para ser esse
-                if (selectedValue) {
-                    select.value = selectedValue;
+                const selectedValueFromData = select.getAttribute('data-selected');
+                
+                if (selectedValueFromData) {
+                    // Tentativa 1: Definir o valor diretamente (método anterior)
+                    select.value = selectedValueFromData;
+
+                    // Tentativa 2: Se o valor não foi definido (talvez por espaços extras),
+                    // percorrer as opções e selecionar a correspondente.
+                    if (select.value !== selectedValueFromData) {
+                        console.warn(`Aviso: Não foi possível definir o valor "${selectedValueFromData}" diretamente para um select. A tentar encontrar manualmente.`);
+                        for (let i = 0; i < select.options.length; i++) {
+                            // Compara os valores removendo espaços extras do início e fim
+                            if (select.options[i].value.trim() === selectedValueFromData.trim()) {
+                                select.selectedIndex = i;
+                                console.log(`Encontrado e selecionado: ${select.options[i].value}`);
+                                break; // Para o loop assim que encontrar
+                            }
+                        }
+                    }
+                    // Se ainda assim não encontrar, o select permanecerá no valor padrão (provavelmente a primeira opção ou vazio)
+                     if (select.value !== selectedValueFromData && select.selectedIndex === 0) {
+                         console.error(`Erro: Não foi encontrada nenhuma opção correspondente a "${selectedValueFromData}" no select.`);
+                     }
                 }
             });
         });
