@@ -1,61 +1,23 @@
-<!DOCTYPE html>
-<html lang="pt-br">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Revisar Proposta</title>
-    <style>
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; max-width: 900px; margin: 40px auto; padding: 20px; background-color: #f9f9f9; border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.05); }
-        h1, h2 { text-align: center; color: #333; }
-        .form-group { margin-bottom: 20px; }
-        label { display: block; margin-bottom: 5px; font-weight: 600; color: #555; }
-        input, textarea, select { width: 100%; padding: 12px; border-radius: 5px; border: 1px solid #ccc; box-sizing: border-box; font-size: 16px; background-color: #fff; }
-        textarea { height: 150px; resize: vertical; }
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; vertical-align: middle; }
-        th { background-color: #f2f2f2; }
-        .product-row input, .product-row select { width: 98%; }
-        .actions { text-align: center; margin-top: 30px; }
-        .button { padding: 15px 30px; color: white; border: none; border-radius: 5px; font-size: 18px; font-weight: bold; cursor: pointer; transition: background-color 0.3s; }
-        .button-primary { background-color: #28a745; }
-        .button-primary:hover { background-color: #218838; }
-        .button-secondary { background-color: #007bff; font-size: 16px; padding: 10px 20px; margin-top: 20px; }
-        .button-secondary:hover { background-color: #0056b3; }
-        .button-danger { background-color: #dc3545; font-size: 14px; padding: 8px 12px; }
-        .button-danger:hover { background-color: #c82333; }
-        .button-warning { background-color: #ffc107; color: #212529; font-size: 14px; padding: 8px 12px; }
-        .button-warning:hover { background-color: #e0a800; }
+{% extends "layout.html" %}
 
-        .editor-container { display: flex; gap: 20px; margin-top: 20px; }
-        .paleta-ferramentas { display: flex; flex-direction: column; gap: 10px; padding: 15px; border: 1px solid #ddd; border-radius: 5px; background-color: #fff; align-self: flex-start; }
-        .paleta-ferramentas h3 { margin: 0 0 10px 0; text-align: center; color: #555; font-size: 16px; }
-        .simbolo { width: 50px; height: 50px; border: 2px solid #ccc; border-radius: 5px; cursor: pointer; display: flex; justify-content: center; align-items: center; background-color: #f9f9f9; }
-        .simbolo:hover, .simbolo.selected { border-color: #007bff; background-color: #e6f0ff; }
-        .simbolo-redondo { background: radial-gradient(circle, #333 2px, transparent 3px); background-size: 10px 10px; border-radius: 50%; }
-        .simbolo-quadrado { background: repeating-linear-gradient(45deg, #333, #333 2px, transparent 2px, transparent 4px); }
-        .simbolo-retangular { background: repeating-linear-gradient(#333, #333 2px, transparent 2px, transparent 4px); }
-        .planta-wrapper { position: relative; width: 100%; border: 1px solid #ccc; border-radius: 5px; }
-        #planta-imagem { width: 100%; height: auto; display: block; border-radius: 5px; }
-        #planta-canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; cursor: crosshair; }
-    </style>
-</head>
-<body>
+{% block title %}Revisar Proposta{% endblock %}
+
+{% block content %}
     <h1>Revisar e Editar Proposta</h1>
-    <h2>Cliente: {{ nome_cliente }}</h2>
+    <h2 style="color: var(--cor-texto-secundario); font-size: 1.5rem;">Cliente: {{ nome_cliente }}</h2>
 
-    <!-- ### ATUALIZAÇÃO ###: Demos um ID ao formulário -->
     <form action="/criar_pdf" method="post" id="review-form">
         <input type="hidden" name="nome_cliente" value="{{ nome_cliente }}">
         
         <!-- Secção 1: Análise do Projeto -->
         <div class="form-group">
-            <label for="analise_projeto">Análise do Projeto (Editável):</label>
+            <h2>Análise do Projeto</h2>
             <textarea id="analise_projeto" name="analise_projeto">{{ proposta.analise_projeto }}</textarea>
         </div>
 
         <!-- Secção 2: Itens da Proposta -->
         <div class="form-group">
-            <label>Itens da Proposta (Editável):</label>
+            <h2>Itens da Proposta</h2>
             <table id="products-table">
                 <thead>
                     <tr>
@@ -79,25 +41,27 @@
                         </td>
                         <td><input type="number" name="quantidade" value="{{ item.quantidade }}" min="1"></td>
                         <td><input type="number" step="0.01" name="preco_unitario" value="{{ item.preco_unitario }}" class="price-input"></td>
-                        <td style="text-align: center;"><button type="button" class="button button-danger" onclick="deleteRow(this)">Excluir</button></td>
+                        <td class="actions-cell">
+                            <button type="button" class="button button-danger button-small" onclick="deleteRow(this)">Excluir</button>
+                        </td>
                     </tr>
                     {% endfor %}
                 </tbody>
             </table>
-            <button type="button" class="button button-secondary" onclick="addRow()">Adicionar Produto</button>
+            <button type="button" class="button button-secondary" onclick="addRow()" style="margin-top: 15px;">Adicionar Produto</button>
         </div>
 
         <!-- Secção 3: Editor de Plantas -->
         <div class="form-group">
-            <label>Editor de Planta</label>
+            <h2>Editor de Planta</h2>
             <div class="editor-container">
                 <div class="paleta-ferramentas">
                     <h3>Ferramentas</h3>
                     <div class="simbolo simbolo-redondo" title="Caixa Redonda" onclick="selectSymbol('redonda')"></div>
                     <div class="simbolo simbolo-quadrado" title="Caixa Quadrada" onclick="selectSymbol('quadrada')"></div>
                     <div class="simbolo simbolo-retangular" title="Caixa de Sobrepor" onclick="selectSymbol('retangular')"></div>
-                    <button type="button" class="button button-warning" onclick="undoLastAction()" style="margin-top: 15px;">Desfazer</button>
-                    <button type="button" class="button button-danger" onclick="clearDrawings()" style="margin-top: 5px;">Limpar</button>
+                    <button type="button" class="button button-warning button-small" onclick="undoLastAction()" style="margin-top: 15px;">Desfazer</button>
+                    <button type="button" class="button button-danger button-small" onclick="clearDrawings()" style="margin-top: 5px;">Limpar</button>
                 </div>
 
                 {% if imagem_planta_url %}
@@ -111,28 +75,33 @@
             </div>
         </div>
         
-        <!-- ### NOVO CAMPO ###: Campo escondido para guardar a imagem desenhada -->
         <input type="hidden" name="imagem_desenhada" id="imagem_desenhada">
 
         <div class="actions">
-            <!-- ### ATUALIZAÇÃO ###: O botão agora é 'type=button' e chama o JavaScript -->
-            <button type="button" class="button button-primary" onclick="submitForm()">Gerar PDF Final</button>
+            <button type="button" class="button button-primary button-full-width" onclick="submitForm()">Gerar PDF Final</button>
         </div>
     </form>
+{% endblock %}
 
+{% block scripts %}
     <script>
-        // --- CÓDIGO JAVASCRIPT EXISTENTE (Tabela) ---
+        // Transforma a lista de produtos do Python numa variável JavaScript
         const catalogo = {{ catalogo_completo | tojson }};
+
         function updatePrice(selectElement) {
+            // Atualiza o preço quando um produto é selecionado
             const selectedOption = selectElement.options[selectElement.selectedIndex];
             const price = selectedOption.getAttribute('data-price');
             const priceInput = selectElement.closest('.product-row').querySelector('.price-input');
             if (price) { priceInput.value = price; }
         }
+        
         function addRow() {
+            // Cria uma nova linha na tabela
             const tableBody = document.getElementById('products-tbody');
             const newRow = document.createElement('tr');
             newRow.classList.add('product-row');
+            
             let innerHTML = `
                 <td>
                     <select name="produto" class="product-select" onchange="updatePrice(this)">
@@ -142,12 +111,15 @@
                 </td>
                 <td><input type="number" name="quantidade" value="1" min="1"></td>
                 <td><input type="number" step="0.01" name="preco_unitario" value="0.00" class="price-input"></td>
-                <td style="text-align: center;"><button type="button" class="button button-danger" onclick="deleteRow(this)">Excluir</button></td>
+                <td class="actions-cell"><button type="button" class="button button-danger button-small" onclick="deleteRow(this)">Excluir</button></td>
             `;
+            
             newRow.innerHTML = innerHTML;
             tableBody.appendChild(newRow);
         }
+
         function deleteRow(button) {
+            // Apaga a linha da tabela
             const row = button.closest('.product-row');
             row.remove();
         }
@@ -241,38 +213,30 @@
             console.log("Desenhos limpos.");
         }
 
-        // ### NOVA FUNÇÃO ###: Funde a imagem e o canvas, e submete o formulário
+        // --- Função para Fundir e Submeter o Formulário ---
         function submitForm() {
             const form = document.getElementById('review-form');
             const hiddenInput = document.getElementById('imagem_desenhada');
             
             if (canvas && imagem) {
                 console.log("A fundir imagem e canvas...");
-                // 1. Cria um canvas temporário
                 const tempCanvas = document.createElement('canvas');
-                // Define o tamanho do canvas temporário para as dimensões REAIS da imagem
                 tempCanvas.width = imagem.naturalWidth;
                 tempCanvas.height = imagem.naturalHeight;
                 const tempCtx = tempCanvas.getContext('2d');
-                
-                // 2. Desenha a imagem original (base)
                 tempCtx.drawImage(imagem, 0, 0);
                 
-                // 3. Desenha o nosso canvas de desenhos por cima
-                // É preciso re-escalar os desenhos, pois o canvas no ecrã pode ter um tamanho
-                // diferente da imagem original (naturalWidth/clientHeight)
                 const scaleX = imagem.naturalWidth / imagem.clientWidth;
                 const scaleY = imagem.naturalHeight / imagem.clientHeight;
                 
-                // Re-executa a lógica de redesenho, mas no canvas temporário e com as coordenadas re-escaladas
                 tempCtx.fillStyle = "#FF0000A0";
                 tempCtx.strokeStyle = "#000000";
-                tempCtx.lineWidth = 2 * scaleX; // Re-escala a linha também
+                tempCtx.lineWidth = 2 * scaleX;
 
                 for (const action of drawingHistory) {
                     const x = action.x * scaleX;
                     const y = action.y * scaleY;
-                    const size = action.size * scaleX; // Re-escala o tamanho do símbolo
+                    const size = action.size * scaleX;
 
                     tempCtx.beginPath();
                     if (action.type === 'redonda') {
@@ -286,17 +250,12 @@
                     tempCtx.stroke();
                 }
                 
-                // 4. Converte o canvas "fundido" para dados de imagem (Base64)
                 const dataURL = tempCanvas.toDataURL('image/png');
-                
-                // 5. Coloca esses dados no nosso campo escondido
                 hiddenInput.value = dataURL;
                 console.log("Imagem desenhada foi guardada no formulário.");
             }
             
-            // 6. Submete o formulário
             form.submit();
         }
     </script>
-</body>
-</html>
+{% endblock %}
