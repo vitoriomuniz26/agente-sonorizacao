@@ -23,20 +23,37 @@
         .button-secondary:hover { background-color: #0056b3; }
         .button-danger { background-color: #dc3545; font-size: 14px; padding: 8px 12px; }
         .button-danger:hover { background-color: #c82333; }
+        .button-warning { background-color: #ffc107; color: #212529; font-size: 14px; padding: 8px 12px; }
+        .button-warning:hover { background-color: #e0a800; }
+
+        .editor-container { display: flex; gap: 20px; margin-top: 20px; }
+        .paleta-ferramentas { display: flex; flex-direction: column; gap: 10px; padding: 15px; border: 1px solid #ddd; border-radius: 5px; background-color: #fff; align-self: flex-start; }
+        .paleta-ferramentas h3 { margin: 0 0 10px 0; text-align: center; color: #555; font-size: 16px; }
+        .simbolo { width: 50px; height: 50px; border: 2px solid #ccc; border-radius: 5px; cursor: pointer; display: flex; justify-content: center; align-items: center; background-color: #f9f9f9; }
+        .simbolo:hover, .simbolo.selected { border-color: #007bff; background-color: #e6f0ff; }
+        .simbolo-redondo { background: radial-gradient(circle, #333 2px, transparent 3px); background-size: 10px 10px; border-radius: 50%; }
+        .simbolo-quadrado { background: repeating-linear-gradient(45deg, #333, #333 2px, transparent 2px, transparent 4px); }
+        .simbolo-retangular { background: repeating-linear-gradient(#333, #333 2px, transparent 2px, transparent 4px); }
+        .planta-wrapper { position: relative; width: 100%; border: 1px solid #ccc; border-radius: 5px; }
+        #planta-imagem { width: 100%; height: auto; display: block; border-radius: 5px; }
+        #planta-canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; cursor: crosshair; }
     </style>
 </head>
 <body>
     <h1>Revisar e Editar Proposta</h1>
     <h2>Cliente: {{ nome_cliente }}</h2>
 
-    <form action="/criar_pdf" method="post">
+    <!-- ### ATUALIZAÇÃO ###: Demos um ID ao formulário -->
+    <form action="/criar_pdf" method="post" id="review-form">
         <input type="hidden" name="nome_cliente" value="{{ nome_cliente }}">
-
+        
+        <!-- Secção 1: Análise do Projeto -->
         <div class="form-group">
             <label for="analise_projeto">Análise do Projeto (Editável):</label>
             <textarea id="analise_projeto" name="analise_projeto">{{ proposta.analise_projeto }}</textarea>
         </div>
 
+        <!-- Secção 2: Itens da Proposta -->
         <div class="form-group">
             <label>Itens da Proposta (Editável):</label>
             <table id="products-table">
@@ -52,7 +69,6 @@
                     {% for item in proposta.itens_proposta %}
                     <tr class="product-row">
                         <td>
-                            <!-- Usamos o atributo 'data-selected' para guardar o valor que a IA escolheu -->
                             <select name="produto" class="product-select" data-selected="{{ item.produto }}" onchange="updatePrice(this)">
                                 {% for produto_catalogo in catalogo_completo %}
                                     <option value="{{ produto_catalogo.Produto }}" data-price="{{ produto_catalogo.VENDA }}">
@@ -71,33 +87,52 @@
             <button type="button" class="button button-secondary" onclick="addRow()">Adicionar Produto</button>
         </div>
 
+        <!-- Secção 3: Editor de Plantas -->
+        <div class="form-group">
+            <label>Editor de Planta</label>
+            <div class="editor-container">
+                <div class="paleta-ferramentas">
+                    <h3>Ferramentas</h3>
+                    <div class="simbolo simbolo-redondo" title="Caixa Redonda" onclick="selectSymbol('redonda')"></div>
+                    <div class="simbolo simbolo-quadrado" title="Caixa Quadrada" onclick="selectSymbol('quadrada')"></div>
+                    <div class="simbolo simbolo-retangular" title="Caixa de Sobrepor" onclick="selectSymbol('retangular')"></div>
+                    <button type="button" class="button button-warning" onclick="undoLastAction()" style="margin-top: 15px;">Desfazer</button>
+                    <button type="button" class="button button-danger" onclick="clearDrawings()" style="margin-top: 5px;">Limpar</button>
+                </div>
+
+                {% if imagem_planta_url %}
+                <div class="planta-wrapper">
+                    <img id="planta-imagem" src="{{ imagem_planta_url }}" alt="Planta do cliente">
+                    <canvas id="planta-canvas"></canvas>
+                </div>
+                {% else %}
+                <p>Nenhuma planta foi enviada para este projeto.</p>
+                {% endif %}
+            </div>
+        </div>
+        
+        <!-- ### NOVO CAMPO ###: Campo escondido para guardar a imagem desenhada -->
+        <input type="hidden" name="imagem_desenhada" id="imagem_desenhada">
+
         <div class="actions">
-            <button type="submit" class="button button-primary">Gerar PDF Final</button>
+            <!-- ### ATUALIZAÇÃO ###: O botão agora é 'type=button' e chama o JavaScript -->
+            <button type="button" class="button button-primary" onclick="submitForm()">Gerar PDF Final</button>
         </div>
     </form>
 
     <script>
-        // Transforma a lista de produtos do Python numa variável JavaScript
+        // --- CÓDIGO JAVASCRIPT EXISTENTE (Tabela) ---
         const catalogo = {{ catalogo_completo | tojson }};
-
         function updatePrice(selectElement) {
-            // Atualiza o preço quando um produto é selecionado
             const selectedOption = selectElement.options[selectElement.selectedIndex];
             const price = selectedOption.getAttribute('data-price');
             const priceInput = selectElement.closest('.product-row').querySelector('.price-input');
-            if (price) {
-                priceInput.value = price;
-            } else {
-                priceInput.value = "0.00"; // Define um valor padrão se não houver preço
-            }
+            if (price) { priceInput.value = price; }
         }
-        
         function addRow() {
-            // Cria uma nova linha na tabela
             const tableBody = document.getElementById('products-tbody');
             const newRow = document.createElement('tr');
             newRow.classList.add('product-row');
-            
             let innerHTML = `
                 <td>
                     <select name="produto" class="product-select" onchange="updatePrice(this)">
@@ -109,47 +144,159 @@
                 <td><input type="number" step="0.01" name="preco_unitario" value="0.00" class="price-input"></td>
                 <td style="text-align: center;"><button type="button" class="button button-danger" onclick="deleteRow(this)">Excluir</button></td>
             `;
-            
             newRow.innerHTML = innerHTML;
             tableBody.appendChild(newRow);
         }
-
         function deleteRow(button) {
-            // Apaga a linha da tabela
             const row = button.closest('.product-row');
             row.remove();
         }
 
-        // ### CORREÇÃO REFORÇADA ###: Esta função agora tenta encontrar a opção de forma mais flexível.
-        document.addEventListener('DOMContentLoaded', function() {
-            document.querySelectorAll('.product-select').forEach(select => {
-                const selectedValueFromData = select.getAttribute('data-selected');
-                
-                if (selectedValueFromData) {
-                    // Tentativa 1: Definir o valor diretamente (método anterior)
-                    select.value = selectedValueFromData;
+        // --- CÓDIGO JAVASCRIPT DO EDITOR DE PLANTAS (com "Desfazer") ---
+        let canvas, ctx, selectedSymbol = null;
+        let simboloTamanho = 10;
+        let drawingHistory = [];
+        const imagem = document.getElementById('planta-imagem');
 
-                    // Tentativa 2: Se o valor não foi definido (talvez por espaços extras),
-                    // percorrer as opções e selecionar a correspondente.
-                    if (select.value !== selectedValueFromData) {
-                        console.warn(`Aviso: Não foi possível definir o valor "${selectedValueFromData}" diretamente para um select. A tentar encontrar manualmente.`);
+        document.addEventListener('DOMContentLoaded', function() {
+            // Lógica de pré-seleção da tabela
+            document.querySelectorAll('.product-select').forEach(select => {
+                const selectedValue = select.getAttribute('data-selected');
+                if (selectedValue) {
+                    select.value = selectedValue;
+                    if (select.value !== selectedValue) {
                         for (let i = 0; i < select.options.length; i++) {
-                            // Compara os valores removendo espaços extras do início e fim
-                            if (select.options[i].value.trim() === selectedValueFromData.trim()) {
+                            if (select.options[i].value.trim() === selectedValue.trim()) {
                                 select.selectedIndex = i;
-                                console.log(`Encontrado e selecionado: ${select.options[i].value}`);
-                                break; // Para o loop assim que encontrar
+                                break;
                             }
                         }
                     }
-                    // Se ainda assim não encontrar, o select permanecerá no valor padrão (provavelmente a primeira opção ou vazio)
-                     if (select.value !== selectedValueFromData && select.selectedIndex === 0) {
-                         console.error(`Erro: Não foi encontrada nenhuma opção correspondente a "${selectedValueFromData}" no select.`);
-                     }
                 }
             });
+            // Inicializa o editor
+            initEditor();
         });
+        
+        function initEditor() {
+            canvas = document.getElementById('planta-canvas');
+            if (!canvas || !imagem) return;
+            ctx = canvas.getContext('2d');
+            
+            // Garante que a imagem esteja carregada para pegar o tamanho certo
+            imagem.onload = () => {
+                canvas.width = imagem.clientWidth;
+                canvas.height = imagem.clientHeight;
+                simboloTamanho = Math.max(canvas.width / 100, 8);
+                console.log(`Editor de planta inicializado. Tamanho do canvas: ${canvas.width}x${canvas.height}`);
+            };
+            if (imagem.complete) {
+                imagem.onload();
+            }
+            
+            canvas.addEventListener('click', handleDraw);
+        }
+        function selectSymbol(tipo) {
+            selectedSymbol = tipo;
+            console.log(`Ferramenta selecionada: ${tipo}`);
+            document.querySelectorAll('.simbolo').forEach(s => s.classList.remove('selected'));
+            document.querySelector(`.simbolo-${tipo}`).classList.add('selected');
+        }
+        function handleDraw(event) {
+            if (!selectedSymbol) {
+                alert("Por favor, selecione uma ferramenta da paleta primeiro.");
+                return;
+            }
+            const x = event.offsetX;
+            const y = event.offsetY;
+            drawingHistory.push({ type: selectedSymbol, x: x, y: y, size: simboloTamanho });
+            redrawCanvas();
+        }
+        function redrawCanvas() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = "#FF0000A0";
+            ctx.strokeStyle = "#000000";
+            ctx.lineWidth = 2;
+            for (const action of drawingHistory) {
+                ctx.beginPath();
+                if (action.type === 'redonda') {
+                    ctx.arc(action.x, action.y, action.size, 0, 2 * Math.PI);
+                } else if (action.type === 'quadrada') {
+                    ctx.rect(action.x - action.size, action.y - action.size, action.size * 2, action.size * 2);
+                } else if (action.type === 'retangular') {
+                    ctx.rect(action.x - (action.size * 1.5), action.y - action.size, action.size * 3, action.size * 2);
+                }
+                ctx.fill();
+                ctx.stroke();
+            }
+        }
+        function undoLastAction() {
+            drawingHistory.pop();
+            redrawCanvas();
+            console.log("Última ação desfeita.");
+        }
+        function clearDrawings() {
+            drawingHistory = [];
+            redrawCanvas();
+            console.log("Desenhos limpos.");
+        }
+
+        // ### NOVA FUNÇÃO ###: Funde a imagem e o canvas, e submete o formulário
+        function submitForm() {
+            const form = document.getElementById('review-form');
+            const hiddenInput = document.getElementById('imagem_desenhada');
+            
+            if (canvas && imagem) {
+                console.log("A fundir imagem e canvas...");
+                // 1. Cria um canvas temporário
+                const tempCanvas = document.createElement('canvas');
+                // Define o tamanho do canvas temporário para as dimensões REAIS da imagem
+                tempCanvas.width = imagem.naturalWidth;
+                tempCanvas.height = imagem.naturalHeight;
+                const tempCtx = tempCanvas.getContext('2d');
+                
+                // 2. Desenha a imagem original (base)
+                tempCtx.drawImage(imagem, 0, 0);
+                
+                // 3. Desenha o nosso canvas de desenhos por cima
+                // É preciso re-escalar os desenhos, pois o canvas no ecrã pode ter um tamanho
+                // diferente da imagem original (naturalWidth/clientHeight)
+                const scaleX = imagem.naturalWidth / imagem.clientWidth;
+                const scaleY = imagem.naturalHeight / imagem.clientHeight;
+                
+                // Re-executa a lógica de redesenho, mas no canvas temporário e com as coordenadas re-escaladas
+                tempCtx.fillStyle = "#FF0000A0";
+                tempCtx.strokeStyle = "#000000";
+                tempCtx.lineWidth = 2 * scaleX; // Re-escala a linha também
+
+                for (const action of drawingHistory) {
+                    const x = action.x * scaleX;
+                    const y = action.y * scaleY;
+                    const size = action.size * scaleX; // Re-escala o tamanho do símbolo
+
+                    tempCtx.beginPath();
+                    if (action.type === 'redonda') {
+                        tempCtx.arc(x, y, size, 0, 2 * Math.PI);
+                    } else if (action.type === 'quadrada') {
+                        tempCtx.rect(x - size, y - size, size * 2, size * 2);
+                    } else if (action.type === 'retangular') {
+                        tempCtx.rect(x - (size * 1.5), y - size, size * 3, size * 2);
+                    }
+                    tempCtx.fill();
+                    tempCtx.stroke();
+                }
+                
+                // 4. Converte o canvas "fundido" para dados de imagem (Base64)
+                const dataURL = tempCanvas.toDataURL('image/png');
+                
+                // 5. Coloca esses dados no nosso campo escondido
+                hiddenInput.value = dataURL;
+                console.log("Imagem desenhada foi guardada no formulário.");
+            }
+            
+            // 6. Submete o formulário
+            form.submit();
+        }
     </script>
 </body>
 </html>
-

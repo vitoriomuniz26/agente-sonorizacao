@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!-- <!DOCTYPE html>
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
@@ -25,6 +25,45 @@
         <textarea id="pedido_tecnico" name="pedido_tecnico" 
                   placeholder="Ex: Projeto para uma sala de 30m² com pé direito de 2.8m e teto de gesso. Cliente quer um som de alta qualidade para filmes. Incluir também a varanda de 15m² com som ambiente."
                   required></textarea>
+
+        <button type="submit">Gerar Proposta com IA</button>
+    </form>
+</body>
+</html> -->
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerador de Propostas de Sonorização</title>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; max-width: 800px; margin: 40px auto; padding: 20px; background-color: #f9f9f9; border: 1px solid #e1e1e1; border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.05); }
+        h1 { text-align: center; color: #333; }
+        label { display: block; margin-top: 20px; font-weight: 600; color: #555; }
+        input[type="text"], textarea { width: 100%; padding: 12px; margin-top: 5px; border-radius: 5px; border: 1px solid #ccc; box-sizing: border-box; font-size: 16px; }
+        /* Estilo para o novo campo de upload */
+        input[type="file"] { width: 100%; padding: 10px; margin-top: 5px; border-radius: 5px; border: 1px solid #ccc; box-sizing: border-box; font-size: 14px; background-color: #fff; }
+        textarea { height: 180px; resize: vertical; }
+        button { display: block; width: 100%; padding: 15px; margin-top: 30px; background-color: #007bff; color: white; border: none; border-radius: 5px; font-size: 18px; font-weight: bold; cursor: pointer; transition: background-color 0.3s; }
+        button:hover { background-color: #0056b3; }
+    </style>
+</head>
+<body>
+    <h1>Gerador de Propostas de Sonorização</h1>
+    
+    <!-- ### MUDANÇA IMPORTANTE ###: Adicionámos o enctype para permitir o upload de ficheiros -->
+    <form action="/gerar_proposta" method="post" enctype="multipart/form-data">
+        <label for="nome_cliente">Nome do Cliente:</label>
+        <input type="text" id="nome_cliente" name="nome_cliente" required>
+
+        <label for="pedido_tecnico">Descrição do Projeto:</label>
+        <textarea id="pedido_tecnico" name="pedido_tecnico" 
+                  placeholder="Ex: Projeto para uma sala de 30m² com pé direito de 2.8m e teto de gesso. Cliente quer um som de alta qualidade para filmes. Incluir também a varanda de 15m² com som ambiente."
+                  required></textarea>
+        
+        <!-- ### NOVO CAMPO ###: O nosso campo de upload de planta -->
+        <label for="planta_imagem">Planta do Ambiente (Opcional):</label>
+        <input type="file" id="planta_imagem" name="planta_imagem" accept="image/png, image/jpeg, image/jpg">
 
         <button type="submit">Gerar Proposta com IA</button>
     </form>
