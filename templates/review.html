@@ -31,7 +31,8 @@
                     {% for item in proposta.itens_proposta %}
                     <tr class="product-row">
                         <td>
-                            <select name="produto" class="product-select" data-selected="{{ item.produto }}" onchange="updatePrice(this)">
+                            <!-- Correção para aspas no nome do produto (ex: 6") -->
+                            <select name="produto" class="product-select" data-selected="{{ item.produto | e }}" onchange="updatePrice(this)">
                                 {% for produto_catalogo in catalogo_completo %}
                                     <option value="{{ produto_catalogo.Produto }}" data-price="{{ produto_catalogo.VENDA }}">
                                         {{ produto_catalogo.Produto }}
@@ -57,9 +58,17 @@
             <div class="editor-container">
                 <div class="paleta-ferramentas">
                     <h3>Ferramentas</h3>
-                    <div class="simbolo simbolo-redondo" title="Caixa Redonda" onclick="selectSymbol('redonda')"></div>
-                    <div class="simbolo simbolo-quadrado" title="Caixa Quadrada" onclick="selectSymbol('quadrada')"></div>
-                    <div class="simbolo simbolo-retangular" title="Caixa de Sobrepor" onclick="selectSymbol('retangular')"></div>
+                    
+                    <div class="simbolo simbolo-redondo" title="Caixa Redonda" onclick="selectSymbol('redonda')">
+                        <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><circle cx="50" cy="50" r="40"/></svg>
+                    </div>
+                    <div class="simbolo simbolo-quadrado" title="Caixa Quadrada" onclick="selectSymbol('quadrada')">
+                        <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect x="10" y="10" width="80" height="80"/></svg>
+                    </div>
+                    <div class="simbolo simbolo-retangular" title="Caixa de Sobrepor" onclick="selectSymbol('retangular')">
+                        <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect x="10" y="25" width="80" height="50"/></svg>
+                    </div>
+                    
                     <button type="button" class="button button-warning button-small" onclick="undoLastAction()" style="margin-top: 15px;">Desfazer</button>
                     <button type="button" class="button button-danger button-small" onclick="clearDrawings()" style="margin-top: 5px;">Limpar</button>
                 </div>
@@ -93,7 +102,11 @@
             const selectedOption = selectElement.options[selectElement.selectedIndex];
             const price = selectedOption.getAttribute('data-price');
             const priceInput = selectElement.closest('.product-row').querySelector('.price-input');
-            if (price) { priceInput.value = price; }
+            if (price) { 
+                priceInput.value = price; 
+            } else {
+                priceInput.value = "0.00";
+            }
         }
         
         function addRow() {
@@ -131,11 +144,13 @@
         const imagem = document.getElementById('planta-imagem');
 
         document.addEventListener('DOMContentLoaded', function() {
-            // Lógica de pré-seleção da tabela
+            // Lógica de pré-seleção da tabela (agora corrigida)
             document.querySelectorAll('.product-select').forEach(select => {
                 const selectedValue = select.getAttribute('data-selected');
                 if (selectedValue) {
                     select.value = selectedValue;
+                    
+                    // Verificação de Plano B (para nomes com espaços extras)
                     if (select.value !== selectedValue) {
                         for (let i = 0; i < select.options.length; i++) {
                             if (select.options[i].value.trim() === selectedValue.trim()) {
@@ -172,7 +187,8 @@
             selectedSymbol = tipo;
             console.log(`Ferramenta selecionada: ${tipo}`);
             document.querySelectorAll('.simbolo').forEach(s => s.classList.remove('selected'));
-            document.querySelector(`.simbolo-${tipo}`).classList.add('selected');
+            // Procura o elemento pelo 'title' e adiciona a classe 'selected'
+            document.querySelector(`[title*="${tipo.charAt(0).toUpperCase() + tipo.slice(1)}"]`).classList.add('selected');
         }
         function handleDraw(event) {
             if (!selectedSymbol) {
@@ -186,8 +202,8 @@
         }
         function redrawCanvas() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-            ctx.fillStyle = "#FF0000A0";
-            ctx.strokeStyle = "#000000";
+            ctx.fillStyle = "rgba(0, 191, 255, 0.7)"; // Cor primária (ciano) com transparência
+            ctx.strokeStyle = "#FFFFFF"; // Contorno branco
             ctx.lineWidth = 2;
             for (const action of drawingHistory) {
                 ctx.beginPath();
@@ -229,8 +245,8 @@
                 const scaleX = imagem.naturalWidth / imagem.clientWidth;
                 const scaleY = imagem.naturalHeight / imagem.clientHeight;
                 
-                tempCtx.fillStyle = "#FF0000A0";
-                tempCtx.strokeStyle = "#000000";
+                tempCtx.fillStyle = "rgba(0, 191, 255, 0.7)";
+                tempCtx.strokeStyle = "#FFFFFF";
                 tempCtx.lineWidth = 2 * scaleX;
 
                 for (const action of drawingHistory) {

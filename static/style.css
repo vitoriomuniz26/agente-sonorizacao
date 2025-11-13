@@ -1,20 +1,19 @@
-/* --- Paleta de Cores e Variáveis --- */
+/* --- Paleta de Cores e Variáveis (Tema Escuro) --- */
 :root {
-    --cor-fundo: #f8f9fa;
-    --cor-fundo-card: #ffffff;
-    --cor-texto-principal: #212529;
-    --cor-texto-secundario: #495057;
-    --cor-primaria: #007bff; /* Um azul profissional clássico */
-    --cor-primaria-hover: #0056b3;
-    --cor-secundaria: #6c757d;
-    --cor-destaque: #17a2b8; /* Ciano, inspirado no logo "Áudio Agora" */
-    --cor-destaque-hover: #138496;
+    --cor-fundo: #0d1117; 
+    --cor-fundo-card: #161b22; 
+    --cor-texto-principal: #e6edf3; 
+    --cor-texto-secundario: #8b949e; 
+    --cor-primaria: #00bfff; 
+    --cor-primaria-hover: #009acd;
+    --cor-secundaria: #007bff; 
+    --cor-secundaria-hover: #0056b3;
     --cor-perigo: #dc3545;
     --cor-perigo-hover: #c82333;
     --cor-aviso: #ffc107;
     --cor-aviso-hover: #e0a800;
-    --cor-borda: #dee2e6;
-    --sombra-card: 0 4px 12px rgba(0, 0, 0, 0.05);
+    --cor-borda: #30363d; 
+    --sombra-card: 0 4px 12px rgba(0, 0, 0, 0.1);
     --raio-borda: 8px;
 }
 
@@ -24,7 +23,7 @@ body {
     margin: 0;
     padding: 0;
     background-color: var(--cor-fundo);
-    color: var(--cor-texto-principal);
+    color: var(--cor-texto-principal); 
     line-height: 1.6;
 }
 
@@ -38,15 +37,21 @@ body {
 .navbar {
     background-color: var(--cor-fundo-card);
     border-bottom: 1px solid var(--cor-borda);
-    box-shadow: var(--sombra-card);
-    padding: 10px 0;
+    padding: 20px 0;
+    text-align: center; 
 }
-.logo {
+.logo-img {
+    max-height: 60px; /* <-- ATUALIZADO como pediu */
+    width: auto;
+}
+.logo-text {
     font-size: 1.5rem;
     color: var(--cor-primaria);
-    text-align: center;
+    font-weight: bold;
+    text-decoration: none;
     margin: 0;
 }
+
 
 /* --- Conteúdo Principal (Cards) --- */
 main.container {
@@ -62,9 +67,9 @@ h1, h2, h3 {
     margin-top: 0;
 }
 h1 { text-align: center; }
-h2 { color: var(--cor-primaria); border-bottom: 2px solid var(--cor-fundo); padding-bottom: 10px; }
+h2 { color: var(--cor-primaria); border-bottom: 2px solid var(--cor-borda); padding-bottom: 10px; }
 
-/* --- Formulários --- */
+/* --- Formulários (Modo Escuro) --- */
 .form-group {
     margin-bottom: 20px;
 }
@@ -76,28 +81,55 @@ label {
 }
 input[type="text"],
 input[type="number"],
+input[type="file"],
 textarea,
 select {
     width: 100%;
     padding: 12px;
     border-radius: var(--raio-borda);
     border: 1px solid var(--cor-borda);
-    box-sizing: border-box; /* Garante que o padding não quebre o layout */
+    box-sizing: border-box; 
     font-size: 16px;
-    background-color: #fff;
+    background-color: var(--cor-fundo); 
+    color: var(--cor-texto-principal); 
     transition: border-color 0.2s, box-shadow 0.2s;
 }
 input:focus, textarea:focus, select:focus {
     outline: none;
     border-color: var(--cor-primaria);
-    box-shadow: 0 0 0 3px rgba(0,123,255,0.25);
+    box-shadow: 0 0 0 3px rgba(0, 191, 255, 0.25); 
 }
 textarea {
     height: 150px;
     resize: vertical;
 }
 
-/* --- Botões (Extremamente Organizado) --- */
+/* ### NOVOS ESTILOS ###: Para agrupar o formulário */
+fieldset {
+    border: 1px solid var(--cor-borda);
+    border-radius: var(--raio-borda);
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+legend {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--cor-primaria);
+    padding: 0 10px;
+    margin-left: 10px;
+}
+
+.form-grid {
+    display: grid;
+    /* Cria colunas responsivas: 3 em ecrãs grandes, 1 em ecrãs pequenos */
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 15px;
+}
+/* ### FIM DOS NOVOS ESTILOS ### */
+
+
+/* --- Botões --- */
 .button {
     display: inline-block;
     padding: 12px 24px;
@@ -117,11 +149,11 @@ textarea {
 .button-full-width {
     width: 100%;
 }
-.button-primary { background-color: var(--cor-primaria); }
+.button-primary { background-color: var(--cor-primaria); color: var(--cor-fundo-card); } 
 .button-primary:hover { background-color: var(--cor-primaria-hover); }
 
-.button-secondary { background-color: var(--cor-destaque); }
-.button-secondary:hover { background-color: var(--cor-destaque-hover); }
+.button-secondary { background-color: var(--cor-secundaria); }
+.button-secondary:hover { background-color: var(--cor-secundaria-hover); }
 
 .button-danger { background-color: var(--cor-perigo); }
 .button-danger:hover { background-color: var(--cor-perigo-hover); }
@@ -131,7 +163,7 @@ textarea {
 
 .button-small { font-size: 14px; padding: 8px 12px; }
 
-/* --- Tabela (Página de Revisão) --- */
+/* --- Tabela (Modo Escuro) --- */
 table {
     width: 100%;
     border-collapse: collapse;
@@ -144,36 +176,37 @@ th, td {
     vertical-align: middle;
 }
 th {
-    background-color: #f8f9fa;
+    background-color: #1c232e; 
     font-weight: 600;
 }
 .product-row input, .product-row select {
     width: 98%;
-    font-size: 14px; /* Fonte menor dentro da tabela */
+    font-size: 14px;
     padding: 8px;
 }
 td.actions-cell {
     text-align: center;
 }
 
-/* --- Editor de Plantas --- */
+/* --- Editor de Plantas (Modo Escuro) --- */
 .editor-container {
     display: flex;
-    flex-wrap: wrap; /* Permite quebrar a linha em ecrãs pequenos */
+    flex-wrap: nowrap; 
     gap: 20px;
     margin-top: 20px;
 }
 .paleta-ferramentas {
-    flex-basis: 150px; /* Largura base da paleta */
-    flex-grow: 1;
+    width: 80px; 
+    flex-shrink: 0; 
     display: flex;
     flex-direction: column;
     gap: 10px;
     padding: 15px;
     border: 1px solid var(--cor-borda);
     border-radius: var(--raio-borda);
-    background-color: var(--cor-fundo);
+    background-color: var(--cor-fundo); 
     align-self: flex-start;
+    align-items: center; 
 }
 .paleta-ferramentas h3 {
     margin: 0 0 10px 0;
@@ -182,9 +215,10 @@ td.actions-cell {
     font-size: 1rem;
     border-bottom: 1px solid var(--cor-borda);
     padding-bottom: 10px;
+    width: 100%; 
 }
 .simbolo {
-    width: 100%;
+    width: 50px; 
     height: 50px;
     border: 2px solid var(--cor-borda);
     border-radius: var(--raio-borda);
@@ -192,22 +226,35 @@ td.actions-cell {
     display: flex;
     justify-content: center;
     align-items: center;
-    background-color: var(--cor-fundo-card);
+    background-color: var(--cor-fundo-card); 
     transition: all 0.2s;
 }
 .simbolo:hover, .simbolo.selected {
     border-color: var(--cor-primaria);
-    background-color: #e6f0ff;
+    background-color: #30363d; 
     transform: scale(1.05);
 }
-.simbolo-redondo { background: radial-gradient(circle, #333 2px, transparent 3px); background-size: 10px 10px; border-radius: 50%; }
-.simbolo-quadrado { background: repeating-linear-gradient(45deg, #333, #333 2px, transparent 2px, transparent 4px); }
-.simbolo-retangular { background: repeating-linear-gradient(#333, #333 2px, transparent 2px, transparent 4px); }
+.simbolo-redondo { border-radius: 50%; }
+.simbolo-quadrado { }
+.simbolo-retangular { }
+.simbolo svg {
+    width: 25px;
+    height: 25px;
+    fill: var(--cor-texto-secundario);
+}
+.simbolo:hover svg, .simbolo.selected svg {
+    fill: var(--cor-primaria);
+}
+
+.paleta-ferramentas .button {
+    width: 100%;
+    box-sizing: border-box; 
+}
 
 .planta-wrapper {
     position: relative;
-    flex-basis: 600px; /* Tenta ocupar mais espaço */
-    flex-grow: 999; /* Cresce muito mais que a paleta */
+    flex-grow: 1; 
+    width: 0; 
     border: 1px solid var(--cor-borda);
     border-radius: var(--raio-borda);
 }
@@ -216,6 +263,7 @@ td.actions-cell {
     height: auto;
     display: block;
     border-radius: var(--raio-borda);
+    filter: brightness(0.85);
 }
 #planta-canvas {
     position: absolute;
@@ -241,21 +289,38 @@ td.actions-cell {
     .container {
         padding: 15px;
     }
+
+    /* O grid do formulário fica com 1 coluna */
+    .form-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .editor-container {
+        flex-wrap: wrap; 
+    }
+
     .paleta-ferramentas {
-        flex-direction: row; /* Coloca os botões lado a lado no telemóvel */
+        flex-direction: row;
         flex-basis: 100%;
+        width: 100%; 
         justify-content: space-around;
         align-items: center;
     }
     .paleta-ferramentas h3 {
-        display: none; /* Esconde o título da paleta em ecrãs pequenos */
+        display: none; 
     }
     .simbolo {
-        width: 45px;
+        width: 45px; 
         height: 45px;
     }
     .paleta-ferramentas .button {
+        width: auto; 
         padding: 8px 10px;
         font-size: 12px;
+    }
+
+    .planta-wrapper {
+        flex-basis: 100%;
+        width: 100%;
     }
 }

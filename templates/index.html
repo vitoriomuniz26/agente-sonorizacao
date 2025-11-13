@@ -7,23 +7,83 @@
     <p style="text-align: center; color: var(--cor-texto-secundario);">Preencha os dados abaixo para que a IA gere uma sugestão de proposta.</p>
 
     <form action="/gerar_proposta" method="post" enctype="multipart/form-data" style="margin-top: 30px;">
-        <div class="form-group">
-            <label for="nome_cliente">Nome do Cliente:</label>
-            <input type="text" id="nome_cliente" name="nome_cliente" required>
-        </div>
-
-        <div class="form-group">
-            <label for="pedido_tecnico">Descrição do Projeto:</label>
-            <textarea id="pedido_tecnico" name="pedido_tecnico" 
-                      placeholder="Ex: Projeto para uma sala de 30m² com pé direito de 2.8m e teto de gesso. Cliente quer um som de alta qualidade para filmes. Incluir também a varanda de 15m² com som ambiente."
-                      required></textarea>
-        </div>
         
-        <div class="form-group">
-            <label for="planta_imagem">Planta do Ambiente (Opcional):</label>
-            <input type="file" id="planta_imagem" name="planta_imagem" accept="image/png, image/jpeg, image/jpg">
-        </div>
+        <!-- Grupo de Dados do Cliente -->
+        <fieldset>
+            <legend>1. Dados do Cliente</legend>
+            <div class="form-group">
+                <label for="nome_cliente">Nome do Cliente:</label>
+                <input type="text" id="nome_cliente" name="nome_cliente" required>
+            </div>
+            
+            <div class="form-grid" style="grid-template-columns: 1fr 2fr;">
+                <div class="form-group">
+                    <label for="documento_cliente">CNPJ ou CPF:</label>
+                    <input type="text" id="documento_cliente" name="documento_cliente">
+                </div>
+                <div class="form-group">
+                    <label for="endereco_cliente">Endereço:</label>
+                    <input type="text" id="endereco_cliente" name="endereco_cliente">
+                </div>
+            </div>
+        </fieldset>
 
-        <button type="submit" class="button button-primary button-full-width">Gerar Proposta com IA</button>
+        <!-- Grupo de Dados do Ambiente -->
+        <fieldset>
+            <legend>2. Detalhes do Ambiente</legend>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="comprimento">Comprimento (m):</label>
+                    <input type="number" step="0.1" id="comprimento" name="comprimento" placeholder="Ex: 8">
+                </div>
+                <div class="form-group">
+                    <label for="largura">Largura (m):</label>
+                    <input type="number" step="0.1" id="largura" name="largura" placeholder="Ex: 5">
+                </div>
+                <div class="form-group">
+                    <label for="altura">Altura (Pé-direito):</label>
+                    <input type="number" step="0.1" id="altura" name="altura" placeholder="Ex: 2.8">
+                </div>
+            </div>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="tipo_teto">Tipo de Teto:</label>
+                    <select id="tipo_teto" name="tipo_teto">
+                        <option value="Teto com forro (gesso, etc.)">Teto com forro (gesso, etc.)</option>
+                        <option value="Sem forro (laje)">Sem forro (laje)</option>
+                        <option value="Outro">Outro</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="tipo_caixa">Tipo de Caixas:</label>
+                    <select id="tipo_caixa" name="tipo_caixa">
+                        <option value="Caixas de embutir (no teto)">Caixas de embutir (no teto)</option>
+                        <option value="Caixas de sobrepor (na parede)">Caixas de sobrepor (na parede)</option>
+                        <option value="Indiferente">Indiferente</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="zonas">Quantidade de Zonas:</label>
+                    <input type="number" id="zonas" name="zonas" min="1" value="1">
+                </div>
+            </div>
+        </fieldset>
+
+        <!-- Grupo de Outras Informações -->
+        <fieldset>
+            <legend>3. Outras Informações</legend>
+            <div class="form-group">
+                <label for="observacoes">Observações Adicionais:</label>
+                <textarea id="observacoes" name="observacoes" 
+                          placeholder="Ex: O cliente quer um som de alta qualidade para filmes. O som da varanda deve ser controlado separadamente."></textarea>
+            </div>
+            
+            <div class="form-group">
+                <label for="planta_imagem">Planta do Ambiente (Opcional):</label>
+                <input type="file" id="planta_imagem" name="planta_imagem" accept="image/png, image/jpeg, image/jpg">
+            </div>
+        </fieldset>
+
+        <button type="submit" class="button button-primary button-full-width">Avançar para Revisão</button>
     </form>
 {% endblock %}
