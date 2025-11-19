@@ -21,6 +21,10 @@
             
             <!-- Descomente esta linha e adicione o seu logo -->
             <img src="{{ url_for('static', filename='audioagorasonorização+-640w (2).png') }}" alt="Logo Áudio Agora" class="logo-img">
+            <button id="theme-toggle" class="theme-toggle" aria-label="Alternar tema">
+                <svg class="icon-sun" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M12 4a1 1 0 0 1 1 1v1a1 1 0 1 1-2 0V5a1 1 0 0 1 1-1Zm0 13a5 5 0 1 1 0-10 5 5 0 0 1 0 10ZM4 13a1 1 0 1 1 0-2H5a1 1 0 1 1 0 2H4Zm14 0a1 1 0 1 1 0-2h1a1 1 0 1 1 0 2h-1ZM5.636 6.05a1 1 0 0 1 1.414 0l.707.708a1 1 0 1 1-1.414 1.414l-.707-.707a1 1 0 0 1 0-1.415Zm10.607.708.707-.708a1 1 0 1 1 1.414 1.415l-.707.707a1 1 0 1 1-1.414-1.414ZM6.343 17.95a1 1 0 1 1 1.414-1.414l.707.707a1 1 0 0 1-1.414 1.414l-.707-.707Zm10.607-.707.707.707a1 1 0 0 1-1.414 1.414l-.707-.707a1 1 0 1 1 1.414-1.414ZM12 18a1 1 0 0 1 1 1v1a1 1 0 1 1-2 0v-1a1 1 0 0 1 1-1Z"/></svg>
+                <svg class="icon-moon" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M21 12.79A9 9 0 1 1 11.21 3a7 7 0 1 0 9.79 9.79Z"/></svg>
+            </button>
             
             <!-- Por enquanto, usamos um texto como placeholder -->
             
@@ -37,6 +41,22 @@
         <p>&copy; 2024 Áudio Agora Sonorização. Todos os direitos reservados.</p>
     </footer>
 
+    <script>
+    (function(){
+        var saved = localStorage.getItem('theme');
+        var preferred = saved ? saved : (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+        document.documentElement.setAttribute('data-theme', preferred);
+        var btn = document.getElementById('theme-toggle');
+        if (btn) {
+            btn.addEventListener('click', function(){
+                var current = document.documentElement.getAttribute('data-theme') || 'light';
+                var next = current === 'light' ? 'dark' : 'light';
+                document.documentElement.setAttribute('data-theme', next);
+                localStorage.setItem('theme', next);
+            });
+        }
+    })();
+    </script>
     <!-- O JavaScript específico de cada página virá aqui -->
     {% block scripts %}{% endblock %}
 </body>

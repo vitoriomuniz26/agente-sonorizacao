@@ -7,7 +7,23 @@
     <h2 style="color: var(--cor-texto-secundario); font-size: 1.5rem;">Cliente: {{ nome_cliente }}</h2>
 
     <form action="/criar_pdf" method="post" id="review-form">
-        <input type="hidden" name="nome_cliente" value="{{ nome_cliente }}">
+        <fieldset>
+            <legend>Dados do Cliente</legend>
+            <div class="form-grid" style="grid-template-columns: 1fr 1fr;">
+                <div class="form-group">
+                    <label for="nome_cliente">Nome do Cliente</label>
+                    <input type="text" id="nome_cliente" name="nome_cliente" value="{{ nome_cliente }}" required>
+                </div>
+                <div class="form-group">
+                    <label for="documento_cliente">CPF/CNPJ</label>
+                    <input type="text" id="documento_cliente" name="documento_cliente" value="{{ documento_cliente }}">
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="endereco_cliente">Endereço</label>
+                <input type="text" id="endereco_cliente" name="endereco_cliente" value="{{ endereco_cliente }}">
+            </div>
+        </fieldset>
         
         <!-- Secção 1: Análise do Projeto -->
         <div class="form-group">
@@ -43,14 +59,67 @@
                         <td><input type="number" name="quantidade" value="{{ item.quantidade }}" min="1"></td>
                         <td><input type="number" step="0.01" name="preco_unitario" value="{{ item.preco_unitario }}" class="price-input"></td>
                         <td class="actions-cell">
-                            <button type="button" class="button button-danger button-small" onclick="deleteRow(this)">Excluir</button>
+                            <button type="button" class="button button-danger button-small" onclick="deleteRow(this)"><svg viewBox="0 0 24 24" width="14" height="14"><path fill="currentColor" d="M9 3a1 1 0 0 0-1 1v1H5a1 1 0 1 0 0 2h14a1 1 0 1 0 0-2h-3V4a1 1 0 0 0-1-1H9Zm-3 7a1 1 0 0 1 1 1v7a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2v-7a1 1 0 1 1 2 0v7a4 4 0 0 1-4 4H9a4 4 0 0 1-4-4v-7a1 1 0 0 1 1-1Zm4 1a1 1 0 0 0-1 1v6a1 1 0 1 0 2 0v-6a1 1 0 0 0-1-1Zm4 0a1 1 0 0 0-1 1v6a1 1 0 1 0 2 0v-6a1 1 0 0 0-1-1Z"/></svg> Excluir</button>
                         </td>
                     </tr>
                     {% endfor %}
                 </tbody>
             </table>
-            <button type="button" class="button button-secondary" onclick="addRow()" style="margin-top: 15px;">Adicionar Produto</button>
+            <button type="button" class="button button-secondary" onclick="addRow()" style="margin-top: 15px;"><svg viewBox="0 0 24 24" width="16" height="16"><path fill="currentColor" d="M12 5a1 1 0 0 1 1 1v5h5a1 1 0 1 1 0 2h-5v5a1 1 0 1 1-2 0v-5H6a1 1 0 1 1 0-2h5V6a1 1 0 0 1 1-1Z"/></svg> Adicionar Produto</button>
+
+            <div class="form-grid" style="margin-top: 15px; grid-template-columns: 1fr;">
+                <div class="form-group">
+                    <label for="valor_integracao">Integração do Sistema (R$)</label>
+                    <input type="number" step="0.01" id="valor_integracao" name="valor_integracao" placeholder="0.00">
+                </div>
+            </div>
+            <input type="hidden" id="valor_total_itens" name="valor_total_itens" value="0.00">
+            <input type="hidden" id="valor_total_geral" name="valor_total_geral" value="0.00">
         </div>
+
+        <fieldset>
+            <legend>Detalhes do Ambiente</legend>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="comprimento">Comprimento (m)</label>
+                    <input type="number" step="0.1" id="comprimento" name="comprimento" value="{{ comprimento }}">
+                </div>
+                <div class="form-group">
+                    <label for="largura">Largura (m)</label>
+                    <input type="number" step="0.1" id="largura" name="largura" value="{{ largura }}">
+                </div>
+                <div class="form-group">
+                    <label for="altura">Altura (Pé-direito)</label>
+                    <input type="number" step="0.1" id="altura" name="altura" value="{{ altura }}">
+                </div>
+            </div>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="tipo_teto">Tipo de Teto</label>
+                    <select id="tipo_teto" name="tipo_teto">
+                        <option value="Teto com forro (gesso, etc.)" {% if tipo_teto == 'Teto com forro (gesso, etc.)' %}selected{% endif %}>Teto com forro (gesso, etc.)</option>
+                        <option value="Sem forro (laje)" {% if tipo_teto == 'Sem forro (laje)' %}selected{% endif %}>Sem forro (laje)</option>
+                        <option value="Outro" {% if tipo_teto == 'Outro' %}selected{% endif %}>Outro</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="tipo_caixa">Tipo de Caixas</label>
+                    <select id="tipo_caixa" name="tipo_caixa">
+                        <option value="Caixas de embutir (no teto)" {% if tipo_caixa == 'Caixas de embutir (no teto)' %}selected{% endif %}>Caixas de embutir (no teto)</option>
+                        <option value="Caixas de sobrepor (na parede)" {% if tipo_caixa == 'Caixas de sobrepor (na parede)' %}selected{% endif %}>Caixas de sobrepor (na parede)</option>
+                        <option value="Indiferente" {% if tipo_caixa == 'Indiferente' %}selected{% endif %}>Indiferente</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="zonas">Quantidade de Zonas</label>
+                    <input type="number" id="zonas" name="zonas" min="1" value="{{ zonas }}">
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="observacoes">Observações</label>
+                <textarea id="observacoes" name="observacoes">{{ observacoes }}</textarea>
+            </div>
+        </fieldset>
 
         <!-- Secção 3: Editor de Plantas -->
         <div class="form-group">
@@ -66,11 +135,14 @@
                         <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect x="10" y="10" width="80" height="80"/></svg>
                     </div>
                     <div class="simbolo simbolo-retangular" title="Caixa de Sobrepor" onclick="selectSymbol('retangular')">
-                        <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect x="10" y="25" width="80" height="50"/></svg>
+                        <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                            <rect x="10" y="25" width="80" height="50"/>
+                            <text x="50" y="53" text-anchor="middle" font-size="26" font-weight="700" fill="currentColor">AMP</text>
+                        </svg>
                     </div>
                     
-                    <button type="button" class="button button-warning button-small" onclick="undoLastAction()" style="margin-top: 15px;">Desfazer</button>
-                    <button type="button" class="button button-danger button-small" onclick="clearDrawings()" style="margin-top: 5px;">Limpar</button>
+                    <button type="button" class="button button-warning button-small" onclick="undoLastAction()" style="margin-top: 15px;"><svg viewBox="0 0 24 24" width="14" height="14"><path fill="currentColor" d="M7.707 7.293a1 1 0 0 0-1.414 1.414L7.586 10H7a7 7 0 0 0 0 14h5a1 1 0 1 0 0-2H7a5 5 0 0 1 0-10h.586l-1.293 1.293a1 1 0 1 0 1.414 1.414l3-3a1 1 0 0 0 0-1.414l-3-3Z"/></svg> Desfazer</button>
+                    <button type="button" class="button button-danger button-small" onclick="clearDrawings()" style="margin-top: 5px;"><svg viewBox="0 0 24 24" width="14" height="14"><path fill="currentColor" d="M4 7a3 3 0 0 1 3-3h10a3 3 0 0 1 2.236 5.02L13.5 16.5a3 3 0 0 1-2.121.879H7a3 3 0 0 1-3-3V7Zm3 9h4.379L17.5 9.379A1 1 0 0 0 16.793 8H7a1 1 0 0 0-1 1v6a2 2 0 0 0 2 2Z"/></svg> Limpar</button>
                 </div>
 
                 {% if imagem_planta_url %}
@@ -87,7 +159,7 @@
         <input type="hidden" name="imagem_desenhada" id="imagem_desenhada">
 
         <div class="actions">
-            <button type="button" class="button button-primary button-full-width" onclick="submitForm()">Gerar PDF Final</button>
+            <button type="button" class="button button-primary button-full-width" onclick="submitForm()"><svg viewBox="0 0 24 24" width="16" height="16"><path fill="currentColor" d="M6 4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h7a5 5 0 0 0 5-5V6a2 2 0 0 0-2-2H6Zm7 4a1 1 0 1 1 0-2h2a1 1 0 1 1 0 2h-2Zm-6 2h4a1 1 0 1 1 0 2H7a1 1 0 1 1 0-2Zm0 4h6a1 1 0 1 1 0 2H7a1 1 0 1 1 0-2Z"/></svg> Gerar PDF Final</button>
         </div>
     </form>
 {% endblock %}
@@ -107,6 +179,7 @@
             } else {
                 priceInput.value = "0.00";
             }
+            recalcTotals();
         }
         
         function addRow() {
@@ -129,12 +202,14 @@
             
             newRow.innerHTML = innerHTML;
             tableBody.appendChild(newRow);
+            recalcTotals();
         }
 
         function deleteRow(button) {
             // Apaga a linha da tabela
             const row = button.closest('.product-row');
             row.remove();
+            recalcTotals();
         }
 
         // --- CÓDIGO JAVASCRIPT DO EDITOR DE PLANTAS (com "Desfazer") ---
@@ -163,6 +238,7 @@
             });
             // Inicializa o editor
             initEditor();
+            if (typeof recalcTotals === 'function') { recalcTotals(); }
         });
         
         function initEditor() {
@@ -202,7 +278,8 @@
         }
         function redrawCanvas() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-            ctx.fillStyle = "rgba(0, 191, 255, 0.7)"; // Cor primária (ciano) com transparência
+            const fillColor = "rgba(220, 53, 69, 0.7)";
+            ctx.fillStyle = fillColor;
             ctx.strokeStyle = "#FFFFFF"; // Contorno branco
             ctx.lineWidth = 2;
             for (const action of drawingHistory) {
@@ -212,10 +289,20 @@
                 } else if (action.type === 'quadrada') {
                     ctx.rect(action.x - action.size, action.y - action.size, action.size * 2, action.size * 2);
                 } else if (action.type === 'retangular') {
-                    ctx.rect(action.x - (action.size * 1.5), action.y - action.size, action.size * 3, action.size * 2);
+                    const rw = action.size * 3.5;
+                    const rh = action.size * 2.4;
+                    ctx.rect(action.x - (rw / 2), action.y - (rh / 2), rw, rh);
                 }
                 ctx.fill();
                 ctx.stroke();
+                if (action.type === 'retangular') {
+                    ctx.fillStyle = "#FFFFFF";
+                    ctx.textAlign = "center";
+                    ctx.textBaseline = "middle";
+                    ctx.font = `bold ${Math.max(12, Math.round(action.size * 0.9))}px Arial`;
+                    ctx.fillText("AMP", action.x, action.y);
+                    ctx.fillStyle = fillColor;
+                }
             }
         }
         function undoLastAction() {
@@ -245,7 +332,8 @@
                 const scaleX = imagem.naturalWidth / imagem.clientWidth;
                 const scaleY = imagem.naturalHeight / imagem.clientHeight;
                 
-                tempCtx.fillStyle = "rgba(0, 191, 255, 0.7)";
+                const fillColor2 = "rgba(220, 53, 69, 0.7)";
+                tempCtx.fillStyle = fillColor2;
                 tempCtx.strokeStyle = "#FFFFFF";
                 tempCtx.lineWidth = 2 * scaleX;
 
@@ -260,10 +348,20 @@
                     } else if (action.type === 'quadrada') {
                         tempCtx.rect(x - size, y - size, size * 2, size * 2);
                     } else if (action.type === 'retangular') {
-                        tempCtx.rect(x - (size * 1.5), y - size, size * 3, size * 2);
+                        const rw = size * 3.5;
+                        const rh = size * 2.4;
+                        tempCtx.rect(x - (rw / 2), y - (rh / 2), rw, rh);
                     }
                     tempCtx.fill();
                     tempCtx.stroke();
+                    if (action.type === 'retangular') {
+                        tempCtx.fillStyle = "#FFFFFF";
+                        tempCtx.textAlign = "center";
+                        tempCtx.textBaseline = "middle";
+                        tempCtx.font = `bold ${Math.max(12, Math.round(size * 0.9))}px Arial`;
+                        tempCtx.fillText("AMP", x, y);
+                        tempCtx.fillStyle = fillColor2;
+                    }
                 }
                 
                 const dataURL = tempCanvas.toDataURL('image/png');
@@ -275,3 +373,37 @@
         }
     </script>
 {% endblock %}
+        function toCents(value) {
+            const n = Number(value);
+            if (Number.isNaN(n)) return 0;
+            return Math.round(n * 100);
+        }
+        function formatBRL(cents) {
+            const v = cents / 100;
+            return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(v);
+        }
+        function recalcTotals() {
+            let totalCents = 0;
+            document.querySelectorAll('#products-tbody .product-row').forEach(row => {
+                const q = Number(row.querySelector('input[name="quantidade"]').value) || 0;
+                const pCents = toCents(row.querySelector('input[name="preco_unitario"]').value);
+                totalCents += q * pCents;
+            });
+            const integracaoCents = toCents(document.getElementById('valor_integracao').value || 0);
+            const totalItensEl = document.getElementById('valor_total_itens');
+            const totalGeralEl = document.getElementById('valor_total_geral');
+            const totalGeralCents = totalCents + integracaoCents;
+            if (totalItensEl) totalItensEl.value = (totalCents / 100).toFixed(2);
+            if (totalGeralEl) totalGeralEl.value = (totalGeralCents / 100).toFixed(2);
+        }
+
+        document.addEventListener('input', function(e) {
+            if (e.target && (e.target.id === 'valor_integracao' || e.target.name === 'quantidade' || e.target.name === 'preco_unitario')) {
+                recalcTotals();
+            }
+        });
+        document.addEventListener('change', function(e) {
+            if (e.target && (e.target.id === 'valor_integracao' || e.target.classList.contains('product-select'))) {
+                recalcTotals();
+            }
+        });

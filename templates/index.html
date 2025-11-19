@@ -6,7 +6,7 @@
     <h1>Novo Projeto de Sonorização</h1>
     <p style="text-align: center; color: var(--cor-texto-secundario);">Preencha os dados abaixo para que a IA gere uma sugestão de proposta.</p>
 
-    <form action="/gerar_proposta" method="post" enctype="multipart/form-data" style="margin-top: 30px;">
+    <form action="/gerar_proposta" method="post" enctype="multipart/form-data" style="margin-top: 30px;" id="main-form">
         
         <!-- Grupo de Dados do Cliente -->
         <fieldset>
@@ -84,6 +84,31 @@
             </div>
         </fieldset>
 
-        <button type="submit" class="button button-primary button-full-width">Avançar para Revisão</button>
+        <button type="submit" class="button button-primary button-full-width"><svg viewBox="0 0 24 24" width="16" height="16"><path fill="currentColor" d="M4 12a1 1 0 0 1 1-1h10.586l-3.293-3.293a1 1 0 1 1 1.414-1.414l5 5a1 1 0 0 1 0 1.414l-5 5a1 1 0 0 1-1.414-1.414L15.586 13H5a1 1 0 0 1-1-1Z"/></svg> Avançar para Revisão</button>
     </form>
+    <div id="loading-overlay" class="loading-overlay">
+        <div class="loading-content">
+            <div class="spinner"></div>
+            <p>Gerando proposta com IA...</p>
+        </div>
+    </div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const form = document.getElementById('main-form');
+    const overlay = document.getElementById('loading-overlay');
+    const submitBtn = form.querySelector('button[type="submit"]');
+    form.addEventListener('submit', () => {
+        if (submitBtn) {
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Carregando...';
+        }
+        if (overlay) {
+            overlay.style.display = 'flex';
+        }
+    });
+});
+</script>
 {% endblock %}

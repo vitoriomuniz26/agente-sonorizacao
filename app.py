@@ -873,55 +873,123 @@ def gerar_proposta_ia(pedido_tecnico_estruturado: str, catalogo_produtos: list) 
 
 # ### FUNÇÃO ATUALIZADA ###: Agora aceita a imagem desenhada
 def gerar_pdf_proposta(proposta: dict, nome_cliente: str, imagem_desenhada_bytes: bytes = None) -> bytes:
-    """Gera o PDF com a proposta (pág 1) e a planta desenhada (pág 2)."""
+    """Gera o PDF com layout profissional e planta desenhada."""
     try:
-        pdf = FPDF()
-        
-        # --- Página 1: A Proposta ---
+        pdf = FPDF(unit="mm")
+        pdf.set_margins(20, 20, 20)
+        pdf.set_auto_page_break(True, margin=20)
+        brand_r, brand_g, brand_b = 124, 58, 237
+
         pdf.add_page()
+
+        logo_path = os.path.join('static', 'audioagorasonorização+-640w (2).png')
+        logo_w = 65
+        page_width = pdf.w
+        x_logo = (page_width - logo_w) / 2
+        if os.path.exists(logo_path):
+            pdf.image(logo_path, x=x_logo, y=20, w=logo_w)
+            pdf.set_y(20 + (logo_w * 0.35) + 30)
+        else:
+            pdf.set_y(20)
+
         pdf.set_font("Arial", "B", 16)
+        pdf.set_text_color(brand_r, brand_g, brand_b)
         pdf.cell(0, 10, "Proposta de Sonorização Ambiente", 0, 1, "C")
-        pdf.set_font("Arial", "", 12)
-        pdf.cell(0, 10, f"Cliente: {nome_cliente}", 0, 1, "C")
-        pdf.ln(10)
+        pdf.set_text_color(0, 0, 0)
+        pdf.ln(2)
+
         pdf.set_font("Arial", "B", 12)
-        pdf.cell(0, 10, "Análise do Projeto", 0, 1)
-        pdf.set_font("Arial", "", 12)
-        pdf.multi_cell(0, 5, str(proposta.get('analise_projeto', 'Nenhuma análise fornecida.')))
-        pdf.ln(10)
+        pdf.set_fill_color(245, 247, 251)
+        pdf.set_draw_color(220, 224, 229)
+        start_y = pdf.get_y() + 2
+        pdf.cell(0, 10, "Dados do Cliente", 0, 1)
+        grid_y = start_y + 12
+        x = pdf.l_margin
+        content_w = page_width - pdf.l_margin - pdf.r_margin
+        gap = 4
+        col_w = (content_w - gap) / 2
+        box_h = 18
+        pdf.set_font("Arial", "", 11)
+        nome = str(proposta.get('nome_cliente', nome_cliente))
+        doc = str(proposta.get('documento_cliente', ''))
+        end = str(proposta.get('endereco_cliente', ''))
+        pdf.rect(x, grid_y, col_w, box_h)
+        pdf.set_xy(x + 2, grid_y + 3)
+        pdf.multi_cell(col_w - 4, 6, f"Nome\n{nome}")
+        right_x = x + col_w + gap
+        pdf.rect(right_x, grid_y, col_w, box_h)
+        pdf.set_xy(right_x + 2, grid_y + 3)
+        pdf.multi_cell(col_w - 4, 6, f"CPF/CNPJ\n{doc}")
+        row2_y = grid_y + box_h + gap
+        pdf.rect(x, row2_y, content_w, box_h)
+        pdf.set_xy(x + 2, row2_y + 3)
+        pdf.multi_cell(content_w - 4, 6, f"Endereço\n{end}")
+        pdf.set_y(row2_y + box_h + 8)
+
         pdf.set_font("Arial", "B", 12)
-        pdf.cell(100, 10, "Produto", 1, 0, "C")
-        pdf.cell(20, 10, "Qtd", 1, 0, "C")
-        pdf.cell(35, 10, "Preço Unit.", 1, 0, "C")
-        pdf.cell(35, 10, "Subtotal", 1, 1, "C")
-        pdf.set_font("Arial", "", 10)
+        pdf.cell(0, 8, "Resumo do Projeto", 0, 1)
+        pdf.set_font("Arial", "", 11)
+        analise = str(proposta.get('analise_projeto', ''))
+        content_w = page_width - pdf.l_margin - pdf.r_margin
+        pdf.set_x(pdf.l_margin)
+        pdf.multi_cell(content_w, 6, analise)
+        pdf.ln(2)
+
+        pdf.set_font("Arial", "B", 12)
+        pdf.set_text_color(brand_r, brand_g, brand_b)
+        pdf.cell(0, 8, "Itens da Proposta", 0, 1)
+        pdf.set_text_color(0, 0, 0)
+        pdf.set_font("Arial", "B", 11)
+        table_w = page_width - pdf.l_margin - pdf.r_margin
+        prod_w = round(table_w * 0.54, 2)
+        qty_w = round(table_w * 0.10, 2)
+        price_w = round(table_w * 0.18, 2)
+        sub_w = round(table_w - (prod_w + qty_w + price_w), 2)
+        pdf.set_x(pdf.l_margin)
+        pdf.cell(prod_w, 8, "Produto", 1, 0, "C")
+        pdf.cell(qty_w, 8, "Qtd", 1, 0, "C")
+        pdf.cell(price_w, 8, "Preço Unit.", 1, 0, "C")
+        pdf.cell(sub_w, 8, "Subtotal", 1, 1, "C")
+        pdf.set_font("Arial", "", 11)
         for item in proposta.get('itens_proposta', []):
             produto = str(item.get('produto', 'N/A'))
             quantidade = str(item.get('quantidade', 0))
             preco_unit = f"R$ {item.get('preco_unitario', 0.0):.2f}"
             subtotal = f"R$ {item.get('subtotal', 0.0):.2f}"
-            pdf.cell(100, 10, produto, 1, 0)
-            pdf.cell(20, 10, quantidade, 1, 0, "C")
-            pdf.cell(35, 10, preco_unit, 1, 0, "R")
-            pdf.cell(35, 10, subtotal, 1, 1, "R")
-        pdf.set_font("Arial", "B", 12)
-        pdf.cell(155, 10, "VALOR TOTAL DO PROJETO", 1, 0)
-        pdf.cell(35, 10, f"R$ {proposta.get('valor_total', 0.0):.2f}", 1, 1, "R")
+            pdf.set_x(pdf.l_margin)
+            pdf.cell(prod_w, 8, produto, 1, 0)
+            pdf.cell(qty_w, 8, quantidade, 1, 0, "C")
+            pdf.cell(price_w, 8, preco_unit, 1, 0, "R")
+            pdf.cell(sub_w, 8, subtotal, 1, 1, "R")
 
-        # --- Página 2: A Planta Desenhada ---
+        pdf.set_font("Arial", "B", 12)
+        pdf.set_fill_color(240, 240, 255)
+        total_label_w = prod_w + qty_w + price_w
+        total_value_w = sub_w
+        pdf.set_x(pdf.l_margin)
+        pdf.cell(total_label_w, 8, "Total dos Itens", 1, 0, 'L')
+        pdf.cell(total_value_w, 8, f"R$ {proposta.get('valor_total_itens', 0.0):.2f}", 1, 1, "R")
+        pdf.set_x(pdf.l_margin)
+        pdf.cell(total_label_w, 8, "Integração do Sistema", 1, 0, 'L')
+        pdf.cell(total_value_w, 8, f"R$ {proposta.get('valor_integracao', 0.0):.2f}", 1, 1, "R")
+        pdf.set_x(pdf.l_margin)
+        pdf.cell(total_label_w, 10, "Total Geral", 1, 0, 'L')
+        pdf.cell(total_value_w, 10, f"R$ {proposta.get('valor_total', 0.0):.2f}", 1, 1, "R")
+
+        pdf.ln(6)
+
         if imagem_desenhada_bytes:
             pdf.add_page()
             pdf.set_font("Arial", "B", 16)
+            pdf.set_text_color(brand_r, brand_g, brand_b)
             pdf.cell(0, 10, "Planta do Ambiente com Posicionamento", 0, 1, "C")
-            pdf.ln(10)
-            
+            pdf.set_text_color(0, 0, 0)
+            pdf.ln(6)
             try:
-                # O FPDF pode ler a imagem diretamente dos bytes em memória
-                pdf.image(io.BytesIO(imagem_desenhada_bytes), x=10, y=30, w=190, type='PNG')
-            except Exception as e:
-                print(f"⚠️ Erro ao adicionar imagem ao PDF: {e}")
+                pdf.image(io.BytesIO(imagem_desenhada_bytes), x=20, y=pdf.get_y(), w=page_width - 40, type='PNG')
+            except Exception:
                 pdf.set_font("Arial", "", 12)
-                pdf.cell(0, 10, "Ocorreu um erro ao processar a imagem da planta desenhada.", 0, 1)
+                pdf.cell(0, 10, "Erro ao processar a imagem da planta desenhada.", 0, 1)
 
         return pdf.output()
     except Exception as e:
@@ -1010,7 +1078,16 @@ def rota_gerar_proposta():
                            nome_cliente=nome_cliente, 
                            proposta=proposta_sugerida, 
                            catalogo_completo=catalogo,
-                           imagem_planta_url=imagem_planta_url)
+                           imagem_planta_url=imagem_planta_url,
+                           documento_cliente=documento_cliente,
+                           endereco_cliente=endereco_cliente,
+                           comprimento=comprimento,
+                           largura=largura,
+                           altura=altura,
+                           tipo_teto=tipo_teto,
+                           tipo_caixa=tipo_caixa,
+                           zonas=zonas,
+                           observacoes=observacoes)
 
 
 @app.route('/criar_pdf', methods=['POST'])
@@ -1021,9 +1098,19 @@ def rota_criar_pdf():
     print("PASSO 2: Recebidos dados editados para gerar PDF final...")
     proposta_final = {}
     proposta_final['nome_cliente'] = request.form.get('nome_cliente')
+    proposta_final['documento_cliente'] = request.form.get('documento_cliente')
+    proposta_final['endereco_cliente'] = request.form.get('endereco_cliente')
+    proposta_final['comprimento'] = request.form.get('comprimento')
+    proposta_final['largura'] = request.form.get('largura')
+    proposta_final['altura'] = request.form.get('altura')
+    proposta_final['tipo_teto'] = request.form.get('tipo_teto')
+    proposta_final['tipo_caixa'] = request.form.get('tipo_caixa')
+    proposta_final['zonas'] = request.form.get('zonas')
+    proposta_final['observacoes'] = request.form.get('observacoes')
     proposta_final['analise_projeto'] = request.form.get('analise_projeto')
+    from decimal import Decimal, ROUND_HALF_UP
     itens = []
-    valor_total_calculado = 0
+    valor_total_calculado = Decimal('0.00')
     produtos = request.form.getlist('produto')
     quantidades = request.form.getlist('quantidade')
     precos = request.form.getlist('preco_unitario')
@@ -1031,21 +1118,28 @@ def rota_criar_pdf():
     for i in range(len(produtos)):
         try:
             quantidade = int(quantidades[i])
-            preco = float(precos[i])
-            subtotal = quantidade * preco
+            preco = Decimal(precos[i] or '0').quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
+            subtotal = (Decimal(quantidade) * preco).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
             
             itens.append({
                 "produto": produtos[i],
                 "quantidade": quantidade,
-                "preco_unitario": preco,
-                "subtotal": subtotal
+                "preco_unitario": float(preco),
+                "subtotal": float(subtotal)
             })
-            valor_total_calculado += subtotal
+            valor_total_calculado = (valor_total_calculado + subtotal).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
         except (ValueError, IndexError):
             continue
             
     proposta_final['itens_proposta'] = itens
-    proposta_final['valor_total'] = valor_total_calculado
+    proposta_final['valor_total_itens'] = float(valor_total_calculado)
+    try:
+        valor_integracao_dec = Decimal(str(request.form.get('valor_integracao') or '0')).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
+    except Exception:
+        valor_integracao_dec = Decimal('0.00')
+    proposta_final['valor_integracao'] = float(valor_integracao_dec)
+    total_geral = (valor_total_calculado + valor_integracao_dec).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
+    proposta_final['valor_total'] = float(total_geral)
 
     # --- LÓGICA PARA RECEBER A IMAGEM DESENHADA ---
     imagem_desenhada_bytes = None
