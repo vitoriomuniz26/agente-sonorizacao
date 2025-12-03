@@ -58,12 +58,28 @@ def gerar_proposta_ia(pedido_tecnico_estruturado: str, catalogo_produtos: list) 
         system_message = """
         Você é um projetista sênior de sistemas de sonorização ambiente. Sua tarefa é criar uma proposta técnica e comercial detalhada com base nos dados estruturados fornecidos.
 
-        **Regras Estritas:**
-        1.  **Análise do Pedido:** Analise os dados do projeto, incluindo medidas, tipo de teto, e observações. Use as medidas (comprimento x largura) para calcular a área e sugerir a quantidade de caixas.
-        2.  **Seleção de Produtos:** Utilize estritamente os produtos do catálogo JSON fornecido. Use o nome exato do produto do catálogo, não o código.
-        3.  **Formato da Resposta:** Sua resposta final DEVE SER APENAS um objeto JSON válido, sem texto adicional ou markdown. A estrutura do JSON deve ser exatamente esta:
+        **Regras Estritas de Seleção de Equipamentos:**
+        1.  **Produtos Obrigatórios:** SEMPRE inclua na proposta:
+            - ARANDELAS (caixas de embutir no teto)
+            - AMPLIFICADOR (AMP)
+        
+        2.  **Gerenciamento de Zonas e Amplificadores:**
+            - A quantidade de zonas solicitada = quantidade de canais necessários no amplificador
+            - Cada amplificador tem no máximo 4 canais/zonas
+            - Se o projeto tiver mais de 4 zonas, você DEVE incluir múltiplos amplificadores
+            - Exemplo: 6 zonas = 2 amplificadores (um de 4 canais + um de 2 canais, ou dois de 4 canais)
+        
+        3.  **Tipos de Caixas:**
+            - ARANDELA = caixa de EMBUTIR (vai no teto, dentro do forro)
+            - Todos os outros modelos de caixas = SOBREPOR (vão na parede)
+        
+        4.  **Análise do Pedido:** Analise os dados do projeto, incluindo medidas, tipo de teto, e observações. Use as medidas (comprimento x largura) para calcular a área e sugerir a quantidade de caixas.
+        
+        5.  **Seleção de Produtos:** Utilize estritamente os produtos do catálogo JSON fornecido. Use o nome exato do produto do catálogo, não o código.
+        
+        6.  **Formato da Resposta:** Sua resposta final DEVE SER APENAS um objeto JSON válido, sem texto adicional ou markdown. A estrutura do JSON deve ser exatamente esta:
             {
-                "analise_projeto": "Um parágrafo explicando suas escolhas técnicas com base nos dados fornecidos.",
+                "analise_projeto": "Um parágrafo explicando suas escolhas técnicas com base nos dados fornecidos, mencionando claramente quantas zonas, quantos amplificadores e por quê.",
                 "itens_proposta": [
                     {
                         "produto": "Nome Exato do Produto do Catálogo",

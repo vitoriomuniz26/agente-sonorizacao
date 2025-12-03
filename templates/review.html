@@ -48,8 +48,9 @@
                 <tr class="product-row">
                     <td>
                         <!-- Correção para aspas no nome do produto (ex: 6") -->
-                        <select name="produto" class="product-select" data-selected="{{ item.produto | e }}"
+                        <select name="produto" class="product-select" data-selected='{{ item.produto }}'
                             onchange="updatePrice(this)">
+                            <option value="">-- Selecione um produto --</option>
                             {% for produto_catalogo in catalogo_completo %}
                             <option value="{{ produto_catalogo.Produto }}" data-price="{{ produto_catalogo.VENDA }}">
                                 {{ produto_catalogo.Produto }}
@@ -251,19 +252,32 @@
     const imagem = document.getElementById('planta-imagem');
 
     document.addEventListener('DOMContentLoaded', function () {
-        // Lógica de pré-seleção da tabela (agora corrigida)
+        // Lógica de pré-seleção da tabela (melhorada)
         document.querySelectorAll('.product-select').forEach(select => {
             const selectedValue = select.getAttribute('data-selected');
             if (selectedValue) {
+                console.log('Tentando selecionar produto:', selectedValue);
+
+                // Tenta seleção direta primeiro
                 select.value = selectedValue;
 
-                // Verificação de Plano B (para nomes com espaços extras)
-                if (select.value !== selectedValue) {
+                // Se não funcionou, procura manualmente
+                if (!select.value || select.value === '') {
+                    let found = false;
                     for (let i = 0; i < select.options.length; i++) {
-                        if (select.options[i].value.trim() === selectedValue.trim()) {
+                        const optionValue = select.options[i].value;
+                        // Compara ignorando espaços extras e diferenças de encoding
+                        if (optionValue.trim() === selectedValue.trim() ||
+                            optionValue === selectedValue ||
+                            optionValue.normalize() === selectedValue.normalize()) {
                             select.selectedIndex = i;
+                            found = true;
+                            console.log('Produto selecionado:', optionValue);
                             break;
                         }
+                    }
+                    if (!found) {
+                        console.warn('Produto não encontrado no catálogo:', selectedValue);
                     }
                 }
             }
